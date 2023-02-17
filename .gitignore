@@ -14,6 +14,11 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
+.vscode/
+
+.build/*
+!.build/.keep
+
 /vendor/
 /playground/
 
