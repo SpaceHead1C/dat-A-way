@@ -15,13 +15,8 @@ type Config struct {
 	DatabaseName string
 }
 
-func NewDB(ctx context.Context, c Config) (*pgx.Conn, error) {
-	dbUrl := connectionString(c)
-	conn, err := pgx.Connect(ctx, dbUrl)
-	if err != nil {
-		return nil, err
-	}
-	return conn, nil
+func NewConnConfig(c Config) (*pgx.ConnConfig, error) {
+	return pgx.ParseConfig(connectionString(c))
 }
 
 func connectionString(c Config) string {
