@@ -1,8 +1,8 @@
 package main
 
 import (
-	"context"
-	"dataway/pkg/db/pg"
+	"dataway/internal/migrations"
+	pkgpg "dataway/pkg/db/pg"
 	"dataway/pkg/log"
 	"os"
 	"time"
@@ -17,7 +17,7 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
-	_, err = pkgpg.NewConnConfig(pkgpg.Config{
+	dbCC, err := pkgpg.NewConnConfig(pkgpg.Config{
 		Address:      c.PostgresAddress,
 		Port:         c.PostgresPort,
 		User:         c.PostgresUser,
@@ -25,6 +25,9 @@ func main() {
 		DatabaseName: c.PostgresDBName,
 	})
 	if err != nil {
+		panic(err.Error())
+	}
+	if err := migrations.UpMigrations(dbCC); err != nil {
 		panic(err.Error())
 	}
 	l.Info("dat(A)way service is up")
