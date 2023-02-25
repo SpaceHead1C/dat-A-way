@@ -17,3 +17,7 @@ func UpMigrations(cc *pgx.ConnConfig) error {
 	return goose.Up(db, ".")
 }
 
+func execQuery(query string, tx *sql.Tx) error {
+	_, err := tx.Exec(query)
+	return err
+}
