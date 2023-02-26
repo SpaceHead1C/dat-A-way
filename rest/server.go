@@ -62,6 +62,8 @@ func NewServer(c Config) (domain.Server, error) {
 	router.Use(mw.StripSlashes)
 	router.Use(mw.GetHead)
 	router.Use(mw.Timeout(out.timeout))
+
+	router.Mount("/health", healthRouter(out))
 	out.srv = &http.Server{
 		Addr:         fmt.Sprintf(":%d", c.Port),
 		WriteTimeout: time.Second * 7,
@@ -70,4 +72,14 @@ func NewServer(c Config) (domain.Server, error) {
 		Handler:      router,
 	}
 	return out, nil
+}
+
+func healthRouter(s *server) *chi.Mux {
+	r := chi.NewRouter()
+	r.Get("/ping", newPingHandler(s))
+	return r
+}
+
+func (s *server) emptyResp(w http.ResponseWriter, status int) {
+	w.WriteHeader(status)
 }
