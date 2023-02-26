@@ -4,6 +4,7 @@ import (
 	"context"
 	"dataway/internal/adapter/pg"
 	apg "dataway/internal/adapter/pg"
+	"dataway/internal/api"
 	pkgpg "dataway/pkg/db/pg"
 	"dataway/pkg/log"
 	"os"
@@ -41,6 +42,18 @@ func newPgRepo(t *testing.T) *apg.Repository {
 	cancel()
 	if err != nil {
 		panic(err.Error())
+	}
+	return out
+}
+
+func newTestConsumerManager(t *testing.T) *api.ConsumerManager {
+	repo := newPgRepo(t)
+	out, err := api.NewConsumerManager(api.ConsumerConfig{
+		Repository: repo,
+		Timeout:    time.Second,
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
 	return out
 }
