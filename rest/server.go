@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/go-chi/chi/v5"
+	mw "github.com/go-chi/chi/v5/middleware"
 	"go.uber.org/zap"
 )
 
@@ -55,11 +57,17 @@ func NewServer(c Config) (domain.Server, error) {
 		errorHandler: eh,
 		timeout:      c.Timeout,
 	}
+
+	router := chi.NewRouter()
+	router.Use(mw.StripSlashes)
+	router.Use(mw.GetHead)
+	router.Use(mw.Timeout(out.timeout))
 	out.srv = &http.Server{
 		Addr:         fmt.Sprintf(":%d", c.Port),
 		WriteTimeout: time.Second * 7,
 		ReadTimeout:  time.Second * 5,
 		IdleTimeout:  time.Second * 10,
+		Handler:      router,
 	}
 	return out, nil
 }
