@@ -6,8 +6,11 @@ import (
 	"dataway/internal/migrations"
 	pkgpg "dataway/pkg/db/pg"
 	"dataway/pkg/log"
+	"dataway/rest"
 	"os"
 	"time"
+
+	"golang.org/x/sync/errgroup"
 )
 
 func main() {
@@ -48,5 +51,27 @@ func main() {
 	if err := repo.Ping(ctx); err != nil {
 		panic(err.Error())
 	}
+
+	restServer, err := rest.NewServer(rest.Config{
+		Logger:  l,
+		Port:    c.RESTPort,
+		Timeout: time.Second * time.Duration(c.RESTTimeoutSec),
+	})
+	if err != nil {
+		panic(err.Error())
+	}
+
+	g, _ := errgroup.WithContext(context.Background())
+	g.Go(func() error {
+		err := restServer.Serve()
+		l.Errorln("REST server error:", err.Error())
+		return err
+	})
+	l.Infof("REST server listens at port: %d", c.RESTPort)
+
 	l.Info("dat(A)way service is up")
+
+	if err := g.Wait(); err != nil {
+		panic(err.Error())
+	}
 }
