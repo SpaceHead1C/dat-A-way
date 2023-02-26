@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"dataway/internal/api"
 	"dataway/internal/domain"
 	"dataway/pkg/log"
 	"fmt"
@@ -17,10 +18,11 @@ const (
 )
 
 type server struct {
-	logger       *zap.SugaredLogger
-	srv          *http.Server
-	errorHandler func(error)
-	timeout      time.Duration
+	logger          *zap.SugaredLogger
+	srv             *http.Server
+	errorHandler    func(error)
+	timeout         time.Duration
+	consumerManager *api.ConsumerManager
 }
 
 func (s *server) Serve() error {
@@ -28,10 +30,11 @@ func (s *server) Serve() error {
 }
 
 type Config struct {
-	Logger       *zap.SugaredLogger
-	Port         uint
-	ErrorHandler func(error)
-	Timeout      time.Duration
+	Logger          *zap.SugaredLogger
+	Port            uint
+	ErrorHandler    func(error)
+	Timeout         time.Duration
+	ConsumerManager *api.ConsumerManager
 }
 
 func NewServer(c Config) (domain.Server, error) {
@@ -49,13 +52,17 @@ func NewServer(c Config) (domain.Server, error) {
 			l.Errorln(e.Error())
 		}
 	}
+	if c.ConsumerManager == nil {
+		return nil, fmt.Errorf("consumers manager must be not nil")
+	}
 	if c.Timeout == 0 {
 		c.Timeout = defaultHTTPServerTimeout
 	}
 	out := &server{
-		logger:       l,
-		errorHandler: eh,
-		timeout:      c.Timeout,
+		logger:          l,
+		errorHandler:    eh,
+		timeout:         c.Timeout,
+		consumerManager: c.ConsumerManager,
 	}
 
 	router := chi.NewRouter()
