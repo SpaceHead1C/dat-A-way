@@ -8,6 +8,7 @@ require (
 	github.com/jackc/pgx/v5 v5.3.0
 	github.com/pressly/goose v2.7.0+incompatible
 	go.uber.org/zap v1.24.0
+	golang.org/x/sync v0.1.0
 )
 
 require (
