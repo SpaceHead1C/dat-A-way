@@ -71,6 +71,7 @@ func NewServer(c Config) (domain.Server, error) {
 	router.Use(mw.Timeout(out.timeout))
 
 	router.Mount("/health", healthRouter(out))
+	router.Mount("/consumer", consumerRouter(out))
 	out.srv = &http.Server{
 		Addr:         fmt.Sprintf(":%d", c.Port),
 		WriteTimeout: time.Second * 7,
@@ -87,6 +88,27 @@ func healthRouter(s *server) *chi.Mux {
 	return r
 }
 
+func consumerRouter(s *server) *chi.Mux {
+	r := chi.NewRouter()
+	r.Post("/", newAddConsumerHandler(s))
+	return r
+}
+
 func (s *server) emptyResp(w http.ResponseWriter, status int) {
 	w.WriteHeader(status)
+}
+
+func (s *server) textResp(w http.ResponseWriter, status int, payload string) {
+	w.Header().Set("Content-Type", "text/plain; charset=UTF-8")
+	if err := writeResp(w, status, []byte(payload)); err != nil {
+		s.errorHandler(err)
+	}
+}
+
+func writeResp(w http.ResponseWriter, status int, payload []byte) error {
+	w.WriteHeader(status)
+	if _, err := w.Write(payload); err != nil {
+		return err
+	}
+	return nil
 }
