@@ -4,6 +4,7 @@ import (
 	"context"
 	"dataway/internal/api"
 	"dataway/internal/domain"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -42,5 +43,29 @@ func UpdateConsumer(ctx context.Context, man *api.ConsumerManager, req UpdConsum
 		}
 		return out, err
 	}
+	return out, nil
+}
+
+func PatchConsumer(ctx context.Context, man *api.ConsumerManager, req UpdConsumerRequestSchema) (Result, error) {
+	out := Result{Status: http.StatusOK}
+	r, err := req.UpdConsumerRequest()
+	if err != nil {
+		out.Status = http.StatusBadRequest
+		return out, err
+	}
+	consumer, err := man.Update(ctx, r)
+	if err != nil {
+		out.Status = http.StatusInternalServerError
+		if errors.Is(err, domain.ErrNotFound) {
+			out.Status = http.StatusNotFound
+		}
+		return out, err
+	}
+	b, err := json.Marshal(ConsumerToResponseSchema(*consumer))
+	if err != nil {
+		out.Status = http.StatusInternalServerError
+		return out, err
+	}
+	out.Payload = b
 	return out, nil
 }

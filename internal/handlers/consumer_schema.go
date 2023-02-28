@@ -36,3 +36,19 @@ func (s *UpdConsumerRequestSchema) UpdConsumerRequest() (domain.UpdConsumerReque
 	out.ID = id
 	return out, nil
 }
+
+type ConsumerResponseSchema struct {
+	ID          string `json:"id"`
+	Queue       string `json:"queue"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+func ConsumerToResponseSchema(c domain.Consumer) ConsumerResponseSchema {
+	return ConsumerResponseSchema{
+		ID:          c.ID.String(),
+		Queue:       c.Queue,
+		Name:        c.Name,
+		Description: c.Description,
+	}
+}
