@@ -29,13 +29,19 @@ func (r *Repository) AddConsumer(ctx context.Context, req AddConsumerRequest) (*
 
 func (r *Repository) UpdateConsumer(ctx context.Context, req UpdConsumerRequest) (*Consumer, error) {
 	var out Consumer
+	emptyReq := true
 	args := make([]any, 3)
 	args[0] = req.ID
 	if req.Name != nil {
 		args[1] = *req.Name
+		emptyReq = false
 	}
 	if req.Description != nil {
 		args[2] = *req.Description
+		emptyReq = false
+	}
+	if emptyReq {
+		return r.GetConsumer(ctx, req.ID)
 	}
 	query := `SELECT * FROM update_consumer($1, $2, $3);`
 	if err := r.QueryRow(ctx, query, args...).Scan(&out.ID, &out.Queue, &out.Name, &out.Description); err != nil {
