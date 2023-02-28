@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"dataway/internal/adapter/pg"
+	"dataway/internal/api"
 	"dataway/internal/migrations"
 	pkgpg "dataway/pkg/db/pg"
 	"dataway/pkg/log"
@@ -45,17 +46,22 @@ func main() {
 		panic(err.Error())
 	}
 	defer repo.Close(context.Background())
+	l.Info("repository configured")
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	if err := repo.Ping(ctx); err != nil {
+	consumerManager, err := api.NewConsumerManager(api.ConsumerConfig{
+		Repository: repo,
+		Timeout:    time.Second,
+	})
+	if err != nil {
 		panic(err.Error())
 	}
+	l.Info("consumers manager configured")
 
 	restServer, err := rest.NewServer(rest.Config{
-		Logger:  l,
-		Port:    c.RESTPort,
-		Timeout: time.Second * time.Duration(c.RESTTimeoutSec),
+		Logger:          l,
+		Port:            c.RESTPort,
+		Timeout:         time.Second * time.Duration(c.RESTTimeoutSec),
+		ConsumerManager: consumerManager,
 	})
 	if err != nil {
 		panic(err.Error())

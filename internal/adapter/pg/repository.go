@@ -8,6 +8,8 @@ import (
 	"go.uber.org/zap"
 )
 
+const getUUIDAttemptsThreshold = 10
+
 type Config struct {
 	ConnectConfig *pgx.ConnConfig
 	Logger        *zap.SugaredLogger
