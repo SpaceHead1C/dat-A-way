@@ -33,3 +33,9 @@ func (cm *ConsumerManager) Add(ctx context.Context, req AddConsumerRequest) (*Co
 	defer cancel()
 	return cm.Repository.AddConsumer(ctx, req)
 }
+
+func (cm *ConsumerManager) Update(ctx context.Context, req UpdConsumerRequest) (*Consumer, error) {
+	ctx, cancel := context.WithTimeout(ctx, cm.Timeout)
+	defer cancel()
+	return cm.Repository.UpdateConsumer(ctx, req)
+}
