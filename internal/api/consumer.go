@@ -4,6 +4,7 @@ import (
 	"context"
 	. "dataway/internal/domain"
 	"fmt"
+	"github.com/google/uuid"
 	"time"
 )
 
@@ -38,4 +39,10 @@ func (cm *ConsumerManager) Update(ctx context.Context, req UpdConsumerRequest) (
 	ctx, cancel := context.WithTimeout(ctx, cm.Timeout)
 	defer cancel()
 	return cm.Repository.UpdateConsumer(ctx, req)
+}
+
+func (cm *ConsumerManager) Get(ctx context.Context, id uuid.UUID) (*Consumer, error) {
+	ctx, cancel := context.WithTimeout(ctx, cm.Timeout)
+	defer cancel()
+	return cm.Repository.GetConsumer(ctx, id)
 }
