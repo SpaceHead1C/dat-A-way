@@ -25,3 +25,23 @@ func (r *Repository) AddConsumer(ctx context.Context, req AddConsumerRequest) (*
 	}
 	return nil, errCanNotGetUniqueID
 }
+
+func (r *Repository) UpdateConsumer(ctx context.Context, req UpdConsumerRequest) (*Consumer, error) {
+	var out Consumer
+	args := make([]any, 3)
+	args[0] = req.ID
+	if req.Name != nil {
+		args[1] = *req.Name
+	}
+	if req.Description != nil {
+		args[2] = *req.Description
+	}
+	query := `SELECT * FROM update_consumer($1, $2, $3);`
+	if err := r.QueryRow(ctx, query, args...).Scan(&out.ID, &out.Queue, &out.Name, &out.Description); err != nil {
+		if pg.IsNoRowsError(err) {
+			return nil, ErrConsumerNotFound
+		}
+		return nil, fmt.Errorf("database error: %w, %s", err, query)
+	}
+	return &out, nil
+}

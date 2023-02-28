@@ -8,6 +8,7 @@ import (
 
 type ConsumerRepository interface {
 	AddConsumer(context.Context, AddConsumerRequest) (*Consumer, error)
+	UpdateConsumer(context.Context, UpdConsumerRequest) (*Consumer, error)
 }
 
 type Consumer struct {
@@ -20,4 +21,10 @@ type Consumer struct {
 type AddConsumerRequest struct {
 	Name        string
 	Description string
+}
+
+type UpdConsumerRequest struct {
+	ID          uuid.UUID
+	Name        *string
+	Description *string
 }
