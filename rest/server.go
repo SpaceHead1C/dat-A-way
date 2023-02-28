@@ -15,6 +15,8 @@ import (
 
 const (
 	defaultHTTPServerTimeout = time.Second * 5
+
+	regexUUIDTemplate = `[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}`
 )
 
 type server struct {
@@ -91,6 +93,7 @@ func healthRouter(s *server) *chi.Mux {
 func consumerRouter(s *server) *chi.Mux {
 	r := chi.NewRouter()
 	r.Post("/", newAddConsumerHandler(s))
+	r.Put(fmt.Sprintf("/{id:%s}", regexUUIDTemplate), newUpdConsumerHandler(s))
 	return r
 }
 
