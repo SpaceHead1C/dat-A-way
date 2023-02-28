@@ -95,6 +95,7 @@ func consumerRouter(s *server) *chi.Mux {
 	r.Post("/", newAddConsumerHandler(s))
 	r.Put(fmt.Sprintf("/{id:%s}", regexUUIDTemplate), newUpdConsumerHandler(s))
 	r.Patch(fmt.Sprintf("/{id:%s}", regexUUIDTemplate), newPatchConsumerHandler(s))
+	r.Get(fmt.Sprintf("/{id:%s}", regexUUIDTemplate), newGetConsumerHandler(s))
 	return r
 }
 
@@ -105,6 +106,13 @@ func (s *server) emptyResp(w http.ResponseWriter, status int) {
 func (s *server) textResp(w http.ResponseWriter, status int, payload string) {
 	w.Header().Set("Content-Type", "text/plain; charset=UTF-8")
 	if err := writeResp(w, status, []byte(payload)); err != nil {
+		s.errorHandler(err)
+	}
+}
+
+func (s *server) jsonResp(w http.ResponseWriter, status int, payload []byte) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	if err := writeResp(w, status, payload); err != nil {
 		s.errorHandler(err)
 	}
 }

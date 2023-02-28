@@ -101,3 +101,22 @@ func newPatchConsumerHandler(s *server) http.HandlerFunc {
 		s.jsonResp(w, res.Status, res.Payload)
 	}
 }
+
+func newGetConsumerHandler(s *server) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		res, err := handlers.GetConsumer(req.Context(), s.consumerManager, chi.URLParam(req, "id"))
+		if err != nil {
+			switch res.Status {
+			case http.StatusBadRequest:
+				s.textResp(w, res.Status, err.Error())
+			case http.StatusInternalServerError:
+				s.logger.Errorf("get consumer error: %s", err)
+				fallthrough
+			default:
+				s.emptyResp(w, res.Status)
+			}
+			return
+		}
+		s.jsonResp(w, res.Status, res.Payload)
+	}
+}
