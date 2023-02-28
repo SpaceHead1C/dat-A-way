@@ -94,6 +94,7 @@ func consumerRouter(s *server) *chi.Mux {
 	r := chi.NewRouter()
 	r.Post("/", newAddConsumerHandler(s))
 	r.Put(fmt.Sprintf("/{id:%s}", regexUUIDTemplate), newUpdConsumerHandler(s))
+	r.Patch(fmt.Sprintf("/{id:%s}", regexUUIDTemplate), newPatchConsumerHandler(s))
 	return r
 }
 
