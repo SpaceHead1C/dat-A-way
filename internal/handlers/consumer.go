@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"net/http"
 )
 
@@ -54,6 +55,31 @@ func PatchConsumer(ctx context.Context, man *api.ConsumerManager, req UpdConsume
 		return out, err
 	}
 	consumer, err := man.Update(ctx, r)
+	if err != nil {
+		out.Status = http.StatusInternalServerError
+		if errors.Is(err, domain.ErrNotFound) {
+			out.Status = http.StatusNotFound
+		}
+		return out, err
+	}
+	b, err := json.Marshal(ConsumerToResponseSchema(*consumer))
+	if err != nil {
+		out.Status = http.StatusInternalServerError
+		return out, err
+	}
+	out.Payload = b
+	return out, nil
+}
+
+func GetConsumer(ctx context.Context, man *api.ConsumerManager, id string) (Result, error) {
+	out := Result{Status: http.StatusOK}
+	cid, err := uuid.Parse(id)
+	if err != nil {
+		out.Status = http.StatusBadRequest
+		out.Payload = []byte(fmt.Sprintf("parse consumer id error: %s", err))
+		return out, err
+	}
+	consumer, err := man.Get(ctx, cid)
 	if err != nil {
 		out.Status = http.StatusInternalServerError
 		if errors.Is(err, domain.ErrNotFound) {
