@@ -10,7 +10,7 @@ import (
 )
 
 func newAddConsumerHandler(s *server) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
 		b, err := io.ReadAll(req.Body)
 		if err != nil {
 			s.textResp(w, http.StatusInternalServerError, "read body error")
@@ -37,7 +37,7 @@ func newAddConsumerHandler(s *server) http.HandlerFunc {
 		}
 		w.Header().Set("Location", fmt.Sprintf("%s/%s", req.URL.String(), res.Payload))
 		s.textResp(w, res.Status, res.Payload)
-	})
+	}
 }
 
 func newUpdConsumerHandler(s *server) http.HandlerFunc {
