@@ -45,3 +45,18 @@ func TestUpdateConsumer(t *testing.T) {
 	t.Log("name:", res.Name)
 	t.Log("description:", res.Description)
 }
+
+func TestGetConsumer(t *testing.T) {
+	mngr := newTestConsumerManager(t)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
+	defer cancel()
+	res, err := mngr.Get(ctx, uuid.MustParse("12345678-1234-1234-1234-123456789012"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log("=== Consumer ===")
+	t.Log("ID:", res.ID.String())
+	t.Log("queue:", res.Queue)
+	t.Log("name:", res.Name)
+	t.Log("description:", res.Description)
+}
