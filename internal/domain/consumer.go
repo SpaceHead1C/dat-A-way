@@ -9,6 +9,7 @@ import (
 type ConsumerRepository interface {
 	AddConsumer(context.Context, AddConsumerRequest) (*Consumer, error)
 	UpdateConsumer(context.Context, UpdConsumerRequest) (*Consumer, error)
+	GetConsumer(context.Context, uuid.UUID) (*Consumer, error)
 }
 
 type Consumer struct {

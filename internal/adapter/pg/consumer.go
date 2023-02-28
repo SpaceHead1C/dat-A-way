@@ -5,6 +5,7 @@ import (
 	. "dataway/internal/domain"
 	"dataway/pkg/db/pg"
 	"fmt"
+	"github.com/google/uuid"
 )
 
 func (r *Repository) AddConsumer(ctx context.Context, req AddConsumerRequest) (*Consumer, error) {
@@ -38,6 +39,18 @@ func (r *Repository) UpdateConsumer(ctx context.Context, req UpdConsumerRequest)
 	}
 	query := `SELECT * FROM update_consumer($1, $2, $3);`
 	if err := r.QueryRow(ctx, query, args...).Scan(&out.ID, &out.Queue, &out.Name, &out.Description); err != nil {
+		if pg.IsNoRowsError(err) {
+			return nil, ErrConsumerNotFound
+		}
+		return nil, fmt.Errorf("database error: %w, %s", err, query)
+	}
+	return &out, nil
+}
+
+func (r *Repository) GetConsumer(ctx context.Context, id uuid.UUID) (*Consumer, error) {
+	query := `SELECT * FROM get_consumer($1);`
+	var out Consumer
+	if err := r.QueryRow(ctx, query, id).Scan(&out.ID, &out.Queue, &out.Name, &out.Description); err != nil {
 		if pg.IsNoRowsError(err) {
 			return nil, ErrConsumerNotFound
 		}
