@@ -1,12 +1,14 @@
 package grpc
 
 import (
+	"context"
 	"dataway/internal/domain"
 	"dataway/internal/pb"
 	"dataway/pkg/log"
 	"fmt"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"net"
 )
 
@@ -47,4 +49,8 @@ func (s *server) Serve() error {
 	s.srv = grpc.NewServer()
 	pb.RegisterDatawayServer(s.srv, s)
 	return s.srv.Serve(listener)
+}
+
+func (s *server) Ping(_ context.Context, _ *emptypb.Empty) (*emptypb.Empty, error) {
+	return &emptypb.Empty{}, nil
 }
