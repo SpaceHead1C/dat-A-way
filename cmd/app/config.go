@@ -10,6 +10,8 @@ type config struct {
 	RESTPort       uint `conf:"flag:rest_port,short:r,env:REST_PORT" toml:"rest_port" zero:"no"`
 	RESTTimeoutSec uint `conf:"flag:rest_timeout,short:r,env:REST_TIMEOUT" toml:"rest_timeout"`
 
+	GRPCPort uint `conf:"flag:grpc_port,short:r,env:GRPC_PORT" toml:"grpc_port" zero:"no"`
+
 	PostgresAddress  string `conf:"flag:postgres_address,env:POSTGRES_ADDRESS" toml:"postgres_address" zero:"no"`
 	PostgresPort     uint   `conf:"flag:postgres_port,env:POSTGRES_PORT" toml:"postgres_port" zero:"no"`
 	PostgresDBName   string `conf:"flag:postgres_db_name,env:POSTGRES_DB_NAME" toml:"postgres_db_name" zero:"no"`
