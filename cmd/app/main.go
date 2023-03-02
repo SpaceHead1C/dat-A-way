@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"dataway/grpc"
 	"dataway/internal/adapter/pg"
 	"dataway/internal/api"
 	"dataway/internal/migrations"
@@ -67,13 +68,24 @@ func main() {
 		panic(err.Error())
 	}
 
+	grpcServer, err := grpc.NewServer(grpc.Config{
+		Logger: l,
+		Port:   c.GRPCPort,
+	})
+
 	g, _ := errgroup.WithContext(context.Background())
 	g.Go(func() error {
 		err := restServer.Serve()
-		l.Errorln("REST server error:", err.Error())
+		l.Errorln("REST server error: ", err.Error())
 		return err
 	})
 	l.Infof("REST server listens at port: %d", c.RESTPort)
+	g.Go(func() error {
+		err := grpcServer.Serve()
+		l.Errorln("gRPC server error: ", err.Error())
+		return err
+	})
+	l.Infof("gRPC server listens at port: %d", c.GRPCPort)
 
 	l.Info("dat(A)way service is up")
 
