@@ -57,7 +57,10 @@ func newPgRepo(t *testing.T) *apg.Repository {
 	if err != nil {
 		t.Fatal(err)
 	}
-	port, _ := strconv.Atoi(os.Getenv("TEST_POSTGRES_PORT"))
+	port, err := strconv.Atoi(os.Getenv("TEST_POSTGRES_PORT"))
+	if err != nil {
+		t.Fatal(err)
+	}
 	dbCC, err := pkgpg.NewConnConfig(pkgpg.Config{
 		Address:      os.Getenv("TEST_POSTGRES_HOST"),
 		Port:         uint(port),
