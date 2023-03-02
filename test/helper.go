@@ -5,8 +5,12 @@ import (
 	"dataway/internal/adapter/pg"
 	apg "dataway/internal/adapter/pg"
 	"dataway/internal/api"
+	"dataway/internal/pb"
 	pkgpg "dataway/pkg/db/pg"
 	"dataway/pkg/log"
+	"fmt"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"os"
 	"strconv"
 	"testing"
@@ -14,6 +18,36 @@ import (
 
 	"github.com/subosito/gotenv"
 )
+
+type grpcConfig struct {
+	address string
+	port    uint
+}
+
+var (
+	gc grpcConfig
+)
+
+func init() {
+	if err := gotenv.Load(); err != nil {
+		panic(err.Error())
+	}
+	port, err := strconv.Atoi(os.Getenv("TEST_GRPC_PORT"))
+	if err != nil {
+		panic(err.Error())
+	}
+	gc = grpcConfig{
+		address: os.Getenv("TEST_GRPC_ADDRESS"),
+		port:    uint(port),
+	}
+}
+
+func (c grpcConfig) dial() (*grpc.ClientConn, error) {
+	return grpc.Dial(
+		fmt.Sprintf("%s:%d", c.address, c.port),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+}
 
 func newPgRepo(t *testing.T) *apg.Repository {
 	if err := gotenv.Load(); err != nil {
@@ -56,4 +90,12 @@ func newTestConsumerManager(t *testing.T) *api.ConsumerManager {
 		t.Fatal(err)
 	}
 	return out
+}
+
+func newGRPCClient(t *testing.T) (pb.DatawayClient, *grpc.ClientConn) {
+	conn, err := gc.dial()
+	if err != nil {
+		t.Fatal(err)
+	}
+	return pb.NewDatawayClient(conn), conn
 }
