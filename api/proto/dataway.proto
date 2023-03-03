@@ -9,6 +9,13 @@ import "google/protobuf/any.proto";
 
 service Dataway {
   rpc Ping(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+
+  rpc RegisterNewTom(google.protobuf.Empty) returns (RegisterNewTomResponse) {}
+}
+
+message RegisterNewTomResponse {
+  repeated Error error = 1;
+  UUID id = 2;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
