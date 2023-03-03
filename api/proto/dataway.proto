@@ -5,7 +5,28 @@ option go_package = "/internal/pb";
 package proto;
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/any.proto";
 
 service Dataway {
   rpc Ping(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Common types and enums
+// ---------------------------------------------------------------------------------------------------------------------
+
+enum ErrorCode {
+  UNDEFINED_ERROR = 0;
+  GENERIC_ERROR = 1;
+  DEPRECATED_METHOD = 2;
+}
+
+message Error {
+  ErrorCode code = 1;
+  string message = 2;
+  repeated google.protobuf.Any details = 3;
+}
+
+message UUID {
+  bytes value = 1;
 }

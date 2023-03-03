@@ -9,8 +9,10 @@ package pb
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	anypb "google.golang.org/protobuf/types/known/anypb"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
+	sync "sync"
 )
 
 const (
@@ -20,31 +22,226 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type ErrorCode int32
+
+const (
+	ErrorCode_UNDEFINED_ERROR   ErrorCode = 0
+	ErrorCode_GENERIC_ERROR     ErrorCode = 1
+	ErrorCode_DEPRECATED_METHOD ErrorCode = 2
+)
+
+// Enum value maps for ErrorCode.
+var (
+	ErrorCode_name = map[int32]string{
+		0: "UNDEFINED_ERROR",
+		1: "GENERIC_ERROR",
+		2: "DEPRECATED_METHOD",
+	}
+	ErrorCode_value = map[string]int32{
+		"UNDEFINED_ERROR":   0,
+		"GENERIC_ERROR":     1,
+		"DEPRECATED_METHOD": 2,
+	}
+)
+
+func (x ErrorCode) Enum() *ErrorCode {
+	p := new(ErrorCode)
+	*p = x
+	return p
+}
+
+func (x ErrorCode) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ErrorCode) Descriptor() protoreflect.EnumDescriptor {
+	return file_dataway_proto_enumTypes[0].Descriptor()
+}
+
+func (ErrorCode) Type() protoreflect.EnumType {
+	return &file_dataway_proto_enumTypes[0]
+}
+
+func (x ErrorCode) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ErrorCode.Descriptor instead.
+func (ErrorCode) EnumDescriptor() ([]byte, []int) {
+	return file_dataway_proto_rawDescGZIP(), []int{0}
+}
+
+type Error struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Code    ErrorCode    `protobuf:"varint,1,opt,name=code,proto3,enum=proto.ErrorCode" json:"code,omitempty"`
+	Message string       `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Details []*anypb.Any `protobuf:"bytes,3,rep,name=details,proto3" json:"details,omitempty"`
+}
+
+func (x *Error) Reset() {
+	*x = Error{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_dataway_proto_msgTypes[0]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Error) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Error) ProtoMessage() {}
+
+func (x *Error) ProtoReflect() protoreflect.Message {
+	mi := &file_dataway_proto_msgTypes[0]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Error.ProtoReflect.Descriptor instead.
+func (*Error) Descriptor() ([]byte, []int) {
+	return file_dataway_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *Error) GetCode() ErrorCode {
+	if x != nil {
+		return x.Code
+	}
+	return ErrorCode_UNDEFINED_ERROR
+}
+
+func (x *Error) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *Error) GetDetails() []*anypb.Any {
+	if x != nil {
+		return x.Details
+	}
+	return nil
+}
+
+type UUID struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Value []byte `protobuf:"bytes,1,opt,name=value,proto3" json:"value,omitempty"`
+}
+
+func (x *UUID) Reset() {
+	*x = UUID{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_dataway_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UUID) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UUID) ProtoMessage() {}
+
+func (x *UUID) ProtoReflect() protoreflect.Message {
+	mi := &file_dataway_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UUID.ProtoReflect.Descriptor instead.
+func (*UUID) Descriptor() ([]byte, []int) {
+	return file_dataway_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *UUID) GetValue() []byte {
+	if x != nil {
+		return x.Value
+	}
+	return nil
+}
+
 var File_dataway_proto protoreflect.FileDescriptor
 
 var file_dataway_proto_rawDesc = []byte{
 	0x0a, 0x0d, 0x64, 0x61, 0x74, 0x61, 0x77, 0x61, 0x79, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12,
 	0x05, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x1b, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f, 0x70,
 	0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2f, 0x65, 0x6d, 0x70, 0x74, 0x79, 0x2e, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x32, 0x43, 0x0a, 0x07, 0x44, 0x61, 0x74, 0x61, 0x77, 0x61, 0x79, 0x12, 0x38,
-	0x0a, 0x04, 0x50, 0x69, 0x6e, 0x67, 0x12, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x16,
-	0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66,
-	0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x22, 0x00, 0x42, 0x0e, 0x5a, 0x0c, 0x2f, 0x69, 0x6e, 0x74,
-	0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x6f, 0x74, 0x6f, 0x1a, 0x19, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x62, 0x75, 0x66, 0x2f, 0x61, 0x6e, 0x79, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x77,
+	0x0a, 0x05, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x12, 0x24, 0x0a, 0x04, 0x63, 0x6f, 0x64, 0x65, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x10, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x45, 0x72,
+	0x72, 0x6f, 0x72, 0x43, 0x6f, 0x64, 0x65, 0x52, 0x04, 0x63, 0x6f, 0x64, 0x65, 0x12, 0x18, 0x0a,
+	0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07,
+	0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x2e, 0x0a, 0x07, 0x64, 0x65, 0x74, 0x61, 0x69,
+	0x6c, 0x73, 0x18, 0x03, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c,
+	0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x41, 0x6e, 0x79, 0x52, 0x07,
+	0x64, 0x65, 0x74, 0x61, 0x69, 0x6c, 0x73, 0x22, 0x1c, 0x0a, 0x04, 0x55, 0x55, 0x49, 0x44, 0x12,
+	0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x05,
+	0x76, 0x61, 0x6c, 0x75, 0x65, 0x2a, 0x4a, 0x0a, 0x09, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x43, 0x6f,
+	0x64, 0x65, 0x12, 0x13, 0x0a, 0x0f, 0x55, 0x4e, 0x44, 0x45, 0x46, 0x49, 0x4e, 0x45, 0x44, 0x5f,
+	0x45, 0x52, 0x52, 0x4f, 0x52, 0x10, 0x00, 0x12, 0x11, 0x0a, 0x0d, 0x47, 0x45, 0x4e, 0x45, 0x52,
+	0x49, 0x43, 0x5f, 0x45, 0x52, 0x52, 0x4f, 0x52, 0x10, 0x01, 0x12, 0x15, 0x0a, 0x11, 0x44, 0x45,
+	0x50, 0x52, 0x45, 0x43, 0x41, 0x54, 0x45, 0x44, 0x5f, 0x4d, 0x45, 0x54, 0x48, 0x4f, 0x44, 0x10,
+	0x02, 0x32, 0x43, 0x0a, 0x07, 0x44, 0x61, 0x74, 0x61, 0x77, 0x61, 0x79, 0x12, 0x38, 0x0a, 0x04,
+	0x50, 0x69, 0x6e, 0x67, 0x12, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x16, 0x2e, 0x67,
+	0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45,
+	0x6d, 0x70, 0x74, 0x79, 0x22, 0x00, 0x42, 0x0e, 0x5a, 0x0c, 0x2f, 0x69, 0x6e, 0x74, 0x65, 0x72,
+	0x6e, 0x61, 0x6c, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
+var (
+	file_dataway_proto_rawDescOnce sync.Once
+	file_dataway_proto_rawDescData = file_dataway_proto_rawDesc
+)
+
+func file_dataway_proto_rawDescGZIP() []byte {
+	file_dataway_proto_rawDescOnce.Do(func() {
+		file_dataway_proto_rawDescData = protoimpl.X.CompressGZIP(file_dataway_proto_rawDescData)
+	})
+	return file_dataway_proto_rawDescData
+}
+
+var file_dataway_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_dataway_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_dataway_proto_goTypes = []interface{}{
-	(*emptypb.Empty)(nil), // 0: google.protobuf.Empty
+	(ErrorCode)(0),        // 0: proto.ErrorCode
+	(*Error)(nil),         // 1: proto.Error
+	(*UUID)(nil),          // 2: proto.UUID
+	(*anypb.Any)(nil),     // 3: google.protobuf.Any
+	(*emptypb.Empty)(nil), // 4: google.protobuf.Empty
 }
 var file_dataway_proto_depIdxs = []int32{
-	0, // 0: proto.Dataway.Ping:input_type -> google.protobuf.Empty
-	0, // 1: proto.Dataway.Ping:output_type -> google.protobuf.Empty
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: proto.Error.code:type_name -> proto.ErrorCode
+	3, // 1: proto.Error.details:type_name -> google.protobuf.Any
+	4, // 2: proto.Dataway.Ping:input_type -> google.protobuf.Empty
+	4, // 3: proto.Dataway.Ping:output_type -> google.protobuf.Empty
+	3, // [3:4] is the sub-list for method output_type
+	2, // [2:3] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_dataway_proto_init() }
@@ -52,18 +249,46 @@ func file_dataway_proto_init() {
 	if File_dataway_proto != nil {
 		return
 	}
+	if !protoimpl.UnsafeEnabled {
+		file_dataway_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Error); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_dataway_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*UUID); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_dataway_proto_rawDesc,
-			NumEnums:      0,
-			NumMessages:   0,
+			NumEnums:      1,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_dataway_proto_goTypes,
 		DependencyIndexes: file_dataway_proto_depIdxs,
+		EnumInfos:         file_dataway_proto_enumTypes,
+		MessageInfos:      file_dataway_proto_msgTypes,
 	}.Build()
 	File_dataway_proto = out.File
 	file_dataway_proto_rawDesc = nil
