@@ -58,6 +58,15 @@ func main() {
 	}
 	l.Info("consumers manager configured")
 
+	tomManager, err := api.NewTomManager(api.TomConfig{
+		Repository: repo,
+		Timeout:    time.Second,
+	})
+	if err != nil {
+		panic(err.Error())
+	}
+	l.Info("toms manager configured")
+
 	restServer, err := rest.NewServer(rest.Config{
 		Logger:          l,
 		Port:            c.RESTPort,
@@ -69,8 +78,9 @@ func main() {
 	}
 
 	grpcServer, err := grpc.NewServer(grpc.Config{
-		Logger: l,
-		Port:   c.GRPCPort,
+		Logger:     l,
+		Port:       c.GRPCPort,
+		TomManager: tomManager,
 	})
 
 	g, _ := errgroup.WithContext(context.Background())

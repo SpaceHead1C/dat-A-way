@@ -2,8 +2,9 @@ package grpc
 
 import (
 	"context"
+	"dataway/internal/api"
 	"dataway/internal/domain"
-	"dataway/internal/pb"
+	. "dataway/internal/pb"
 	"dataway/pkg/log"
 	"fmt"
 	"go.uber.org/zap"
@@ -13,16 +14,18 @@ import (
 )
 
 type server struct {
-	pb.UnimplementedDatawayServer
-	logger   *zap.SugaredLogger
-	srv      *grpc.Server
-	listener net.Listener
-	port     uint
+	UnimplementedDatawayServer
+	logger     *zap.SugaredLogger
+	srv        *grpc.Server
+	listener   net.Listener
+	port       uint
+	tomManager *api.TomManager
 }
 
 type Config struct {
-	Logger *zap.SugaredLogger
-	Port   uint
+	Logger     *zap.SugaredLogger
+	Port       uint
+	TomManager *api.TomManager
 }
 
 func NewServer(c Config) (domain.Server, error) {
@@ -34,9 +37,13 @@ func NewServer(c Config) (domain.Server, error) {
 			return nil, err
 		}
 	}
+	if c.TomManager == nil {
+		return nil, fmt.Errorf("tom manager must be not nil")
+	}
 	return &server{
-		logger: l,
-		port:   c.Port,
+		logger:     l,
+		port:       c.Port,
+		tomManager: c.TomManager,
 	}, nil
 }
 
@@ -47,7 +54,7 @@ func (s *server) Serve() error {
 	}
 	s.listener = listener
 	s.srv = grpc.NewServer()
-	pb.RegisterDatawayServer(s.srv, s)
+	RegisterDatawayServer(s.srv, s)
 	return s.srv.Serve(listener)
 }
 
