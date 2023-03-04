@@ -24,7 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DatawayClient interface {
 	Ping(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	RegisterNewTom(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*RegisterNewTomResponse, error)
+	RegisterNewTom(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*UUID, error)
 }
 
 type datawayClient struct {
@@ -44,8 +44,8 @@ func (c *datawayClient) Ping(ctx context.Context, in *emptypb.Empty, opts ...grp
 	return out, nil
 }
 
-func (c *datawayClient) RegisterNewTom(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*RegisterNewTomResponse, error) {
-	out := new(RegisterNewTomResponse)
+func (c *datawayClient) RegisterNewTom(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*UUID, error) {
+	out := new(UUID)
 	err := c.cc.Invoke(ctx, "/proto.Dataway/RegisterNewTom", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func (c *datawayClient) RegisterNewTom(ctx context.Context, in *emptypb.Empty, o
 // for forward compatibility
 type DatawayServer interface {
 	Ping(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
-	RegisterNewTom(context.Context, *emptypb.Empty) (*RegisterNewTomResponse, error)
+	RegisterNewTom(context.Context, *emptypb.Empty) (*UUID, error)
 	mustEmbedUnimplementedDatawayServer()
 }
 
@@ -69,7 +69,7 @@ type UnimplementedDatawayServer struct {
 func (UnimplementedDatawayServer) Ping(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
 }
-func (UnimplementedDatawayServer) RegisterNewTom(context.Context, *emptypb.Empty) (*RegisterNewTomResponse, error) {
+func (UnimplementedDatawayServer) RegisterNewTom(context.Context, *emptypb.Empty) (*UUID, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RegisterNewTom not implemented")
 }
 func (UnimplementedDatawayServer) mustEmbedUnimplementedDatawayServer() {}
