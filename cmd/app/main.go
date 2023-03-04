@@ -88,20 +88,18 @@ func main() {
 	g, _ := errgroup.WithContext(context.Background())
 	g.Go(func() error {
 		err := restServer.Serve()
-		l.Errorln("REST server error: ", err.Error())
-		return err
+		return fmt.Errorf("REST server error: %w", err)
 	})
 	l.Infof("REST server listens at port: %d", c.RESTPort)
 	g.Go(func() error {
 		err := grpcServer.Serve()
-		l.Errorln("gRPC server error: ", err.Error())
-		return err
+		return fmt.Errorf("gRPC server error: %w", err)
 	})
 	l.Infof("gRPC server listens at port: %d", c.GRPCPort)
 
 	l.Info("dat(A)way service is up")
 
 	if err := g.Wait(); err != nil {
-		panic(err.Error())
+		l.Fatal(err.Error())
 	}
 }
