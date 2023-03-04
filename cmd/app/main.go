@@ -7,8 +7,10 @@ import (
 	"dataway/internal/api"
 	"dataway/internal/migrations"
 	pkgpg "dataway/pkg/db/pg"
-	"dataway/pkg/log"
+	pkglog "dataway/pkg/log"
 	"dataway/rest"
+	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -18,11 +20,11 @@ import (
 func main() {
 	c := newConfig()
 	if err := parse(os.Args[1:], c); err != nil {
-		panic(err.Error())
+		log.Fatalf("arguments parse error: %s", err)
 	}
-	l, err := log.NewLogger()
+	l, err := pkglog.NewLogger()
 	if err != nil {
-		panic(err.Error())
+		log.Fatalf("logger constructor error: %s", err)
 	}
 	dbCC, err := pkgpg.NewConnConfig(pkgpg.Config{
 		Address:      c.PostgresAddress,
@@ -32,7 +34,7 @@ func main() {
 		DatabaseName: c.PostgresDBName,
 	})
 	if err != nil {
-		panic(err.Error())
+		l.Fatal(err.Error())
 	}
 	if err := migrations.UpMigrations(dbCC); err != nil {
 		panic(err.Error())
@@ -44,7 +46,7 @@ func main() {
 	})
 	cancel()
 	if err != nil {
-		panic(err.Error())
+		l.Fatal(err.Error())
 	}
 	defer repo.Close(context.Background())
 	l.Info("repository configured")
@@ -54,7 +56,7 @@ func main() {
 		Timeout:    time.Second,
 	})
 	if err != nil {
-		panic(err.Error())
+		l.Fatal(err.Error())
 	}
 	l.Info("consumers manager configured")
 
@@ -63,7 +65,7 @@ func main() {
 		Timeout:    time.Second,
 	})
 	if err != nil {
-		panic(err.Error())
+		l.Fatal(err.Error())
 	}
 	l.Info("toms manager configured")
 
@@ -74,7 +76,7 @@ func main() {
 		ConsumerManager: consumerManager,
 	})
 	if err != nil {
-		panic(err.Error())
+		l.Fatal(err.Error())
 	}
 
 	grpcServer, err := grpc.NewServer(grpc.Config{
