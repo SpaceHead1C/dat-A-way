@@ -61,3 +61,8 @@ func (s *server) Serve() error {
 func (s *server) Ping(_ context.Context, _ *emptypb.Empty) (*emptypb.Empty, error) {
 	return &emptypb.Empty{}, nil
 }
+
+func (s *server) RegisterNewTom(ctx context.Context, _ *emptypb.Empty) (*UUID, error) {
+	ctx = log.ContextWithLogger(ctx, s.logger)
+	return RegisterNewTom(ctx, s.tomManager)
+}
