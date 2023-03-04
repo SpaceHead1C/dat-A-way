@@ -37,7 +37,7 @@ func main() {
 		l.Fatal(err.Error())
 	}
 	if err := migrations.UpMigrations(dbCC); err != nil {
-		panic(err.Error())
+		l.Fatal(err.Error())
 	}
 	dbCtx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	repo, err := pg.NewRepository(dbCtx, pg.Config{
