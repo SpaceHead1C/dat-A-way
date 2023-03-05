@@ -7,8 +7,10 @@ import (
 	"dataway/internal/api"
 	"dataway/internal/migrations"
 	pkgpg "dataway/pkg/db/pg"
-	"dataway/pkg/log"
+	pkglog "dataway/pkg/log"
 	"dataway/rest"
+	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -18,11 +20,11 @@ import (
 func main() {
 	c := newConfig()
 	if err := parse(os.Args[1:], c); err != nil {
-		panic(err.Error())
+		log.Fatalf("arguments parse error: %s", err)
 	}
-	l, err := log.NewLogger()
+	l, err := pkglog.NewLogger()
 	if err != nil {
-		panic(err.Error())
+		log.Fatalf("logger constructor error: %s", err)
 	}
 	dbCC, err := pkgpg.NewConnConfig(pkgpg.Config{
 		Address:      c.PostgresAddress,
@@ -32,10 +34,10 @@ func main() {
 		DatabaseName: c.PostgresDBName,
 	})
 	if err != nil {
-		panic(err.Error())
+		l.Fatal(err.Error())
 	}
 	if err := migrations.UpMigrations(dbCC); err != nil {
-		panic(err.Error())
+		l.Fatal(err.Error())
 	}
 	dbCtx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	repo, err := pg.NewRepository(dbCtx, pg.Config{
@@ -44,7 +46,7 @@ func main() {
 	})
 	cancel()
 	if err != nil {
-		panic(err.Error())
+		l.Fatal(err.Error())
 	}
 	defer repo.Close(context.Background())
 	l.Info("repository configured")
@@ -54,9 +56,18 @@ func main() {
 		Timeout:    time.Second,
 	})
 	if err != nil {
-		panic(err.Error())
+		l.Fatal(err.Error())
 	}
 	l.Info("consumers manager configured")
+
+	tomManager, err := api.NewTomManager(api.TomConfig{
+		Repository: repo,
+		Timeout:    time.Second,
+	})
+	if err != nil {
+		l.Fatal(err.Error())
+	}
+	l.Info("toms manager configured")
 
 	restServer, err := rest.NewServer(rest.Config{
 		Logger:          l,
@@ -65,31 +76,30 @@ func main() {
 		ConsumerManager: consumerManager,
 	})
 	if err != nil {
-		panic(err.Error())
+		l.Fatal(err.Error())
 	}
 
 	grpcServer, err := grpc.NewServer(grpc.Config{
-		Logger: l,
-		Port:   c.GRPCPort,
+		Logger:     l,
+		Port:       c.GRPCPort,
+		TomManager: tomManager,
 	})
 
 	g, _ := errgroup.WithContext(context.Background())
 	g.Go(func() error {
 		err := restServer.Serve()
-		l.Errorln("REST server error: ", err.Error())
-		return err
+		return fmt.Errorf("REST server error: %w", err)
 	})
 	l.Infof("REST server listens at port: %d", c.RESTPort)
 	g.Go(func() error {
 		err := grpcServer.Serve()
-		l.Errorln("gRPC server error: ", err.Error())
-		return err
+		return fmt.Errorf("gRPC server error: %w", err)
 	})
 	l.Infof("gRPC server listens at port: %d", c.GRPCPort)
 
 	l.Info("dat(A)way service is up")
 
 	if err := g.Wait(); err != nil {
-		panic(err.Error())
+		l.Fatal(err.Error())
 	}
 }
