@@ -7,6 +7,7 @@ import (
 
 type SubscriptionRepository interface {
 	AddSubscription(context.Context, AddSubscriptionRequest) (*Subscription, error)
+	DeleteSubscription(context.Context, DeleteSubscriptionRequest) (*Subscription, error)
 }
 
 type Subscription struct {
@@ -16,6 +17,12 @@ type Subscription struct {
 }
 
 type AddSubscriptionRequest struct {
+	ConsumerID uuid.UUID
+	TomID      uuid.UUID
+	PropertyID uuid.UUID
+}
+
+type DeleteSubscriptionRequest struct {
 	ConsumerID uuid.UUID
 	TomID      uuid.UUID
 	PropertyID uuid.UUID

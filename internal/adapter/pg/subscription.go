@@ -20,3 +20,20 @@ func (r *Repository) AddSubscription(ctx context.Context, req AddSubscriptionReq
 	}
 	return &out, nil
 }
+
+func (r *Repository) DeleteSubscription(ctx context.Context, req DeleteSubscriptionRequest) (*Subscription, error) {
+	var out Subscription
+	args := []any{
+		pg.NullUUID(req.ConsumerID),
+		pg.NullUUID(req.TomID),
+		pg.NullUUID(req.PropertyID),
+	}
+	query := `SELECT * FROM delete_subscription($1, $2, $3);`
+	if err := r.QueryRow(ctx, query, args...).Scan(&out.ConsumerID, &out.TomID, &out.PropertyID); err != nil {
+		if pg.IsNoRowsError(err) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("database error: %w, %s", err, query)
+	}
+	return &out, nil
+}
