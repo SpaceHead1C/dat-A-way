@@ -33,3 +33,9 @@ func (sm *SubscriptionManager) Add(ctx context.Context, req AddSubscriptionReque
 	defer cancel()
 	return sm.Repository.AddSubscription(ctx, req)
 }
+
+func (sm *SubscriptionManager) Delete(ctx context.Context, req DeleteSubscriptionRequest) (*Subscription, error) {
+	ctx, cancel := context.WithTimeout(ctx, sm.Timeout)
+	defer cancel()
+	return sm.Repository.DeleteSubscription(ctx, req)
+}
