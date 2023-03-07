@@ -15,17 +15,21 @@ import (
 
 type server struct {
 	UnimplementedDatawayServer
-	logger     *zap.SugaredLogger
-	srv        *grpc.Server
-	listener   net.Listener
-	port       uint
-	tomManager *api.TomManager
+	logger   *zap.SugaredLogger
+	srv      *grpc.Server
+	listener net.Listener
+	port     uint
+
+	tomManager          *api.TomManager
+	subscriptionManager *api.SubscriptionManager
 }
 
 type Config struct {
-	Logger     *zap.SugaredLogger
-	Port       uint
-	TomManager *api.TomManager
+	Logger *zap.SugaredLogger
+	Port   uint
+
+	TomManager          *api.TomManager
+	SubscriptionManager *api.SubscriptionManager
 }
 
 func NewServer(c Config) (domain.Server, error) {
@@ -38,12 +42,17 @@ func NewServer(c Config) (domain.Server, error) {
 		}
 	}
 	if c.TomManager == nil {
-		return nil, fmt.Errorf("tom manager must be not nil")
+		return nil, fmt.Errorf("toms manager must be not nil")
+	}
+	if c.SubscriptionManager == nil {
+		return nil, fmt.Errorf("subscriptions manager must be not nil")
 	}
 	return &server{
-		logger:     l,
-		port:       c.Port,
-		tomManager: c.TomManager,
+		logger: l,
+		port:   c.Port,
+
+		tomManager:          c.TomManager,
+		subscriptionManager: c.SubscriptionManager,
 	}, nil
 }
 
