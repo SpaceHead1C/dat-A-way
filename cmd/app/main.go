@@ -69,6 +69,15 @@ func main() {
 	}
 	l.Info("toms manager configured")
 
+	subscriptionManager, err := api.NewSubscriptionManager(api.SubscriptionConfig{
+		Repository: repo,
+		Timeout:    time.Second,
+	})
+	if err != nil {
+		l.Fatal(err.Error())
+	}
+	l.Info("subscriptions manager configured")
+
 	restServer, err := rest.NewServer(rest.Config{
 		Logger:          l,
 		Port:            c.RESTPort,
@@ -80,9 +89,11 @@ func main() {
 	}
 
 	grpcServer, err := grpc.NewServer(grpc.Config{
-		Logger:     l,
-		Port:       c.GRPCPort,
-		TomManager: tomManager,
+		Logger: l,
+		Port:   c.GRPCPort,
+
+		TomManager:          tomManager,
+		SubscriptionManager: subscriptionManager,
 	})
 
 	g, _ := errgroup.WithContext(context.Background())

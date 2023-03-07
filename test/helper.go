@@ -107,6 +107,18 @@ func newTestTomManager(t *testing.T) *api.TomManager {
 	return out
 }
 
+func newTestSubscriptionManager(t *testing.T) *api.SubscriptionManager {
+	repo := newPgRepo(t)
+	out, err := api.NewSubscriptionManager(api.SubscriptionConfig{
+		Repository: repo,
+		Timeout:    time.Second,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return out
+}
+
 func newGRPCClient(t *testing.T) (pb.DatawayClient, *grpc.ClientConn) {
 	conn, err := gc.dial()
 	if err != nil {

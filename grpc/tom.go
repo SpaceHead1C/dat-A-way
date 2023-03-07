@@ -15,5 +15,5 @@ func RegisterNewTom(ctx context.Context, man *api.TomManager) (*pb.UUID, error) 
 		log.LoggerFromContext(ctx).Errorf("new tom register error: %s", err)
 		return nil, status.Errorf(codes.Internal, "new tom register error")
 	}
-	return &pb.UUID{Value: id[:]}, nil
+	return pb.UUIDToPb(id), nil
 }
