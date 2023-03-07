@@ -75,3 +75,13 @@ func (s *server) RegisterNewTom(ctx context.Context, _ *emptypb.Empty) (*UUID, e
 	ctx = log.ContextWithLogger(ctx, s.logger)
 	return RegisterNewTom(ctx, s.tomManager)
 }
+
+func (s *server) Subscribe(ctx context.Context, req *Subscription) (*Subscription, error) {
+	ctx = log.ContextWithLogger(ctx, s.logger)
+	return Subscribe(ctx, s.subscriptionManager, req)
+}
+
+func (s *server) DeleteSubscription(ctx context.Context, req *Subscription) (*emptypb.Empty, error) {
+	ctx = log.ContextWithLogger(ctx, s.logger)
+	return &emptypb.Empty{}, DeleteSubscription(ctx, s.subscriptionManager, req)
+}
