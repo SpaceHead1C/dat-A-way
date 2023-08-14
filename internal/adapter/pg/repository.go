@@ -4,19 +4,19 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
 )
 
 const getUUIDAttemptsThreshold = 10
 
 type Config struct {
-	ConnectConfig *pgx.ConnConfig
+	ConnectConfig *pgxpool.Config
 	Logger        *zap.SugaredLogger
 }
 
 type Repository struct {
-	*pgx.Conn
+	*pgxpool.Pool
 	l *zap.SugaredLogger
 }
 
@@ -27,9 +27,9 @@ func NewRepository(ctx context.Context, c Config) (*Repository, error) {
 	if c.Logger == nil {
 		c.Logger = zap.L().Sugar()
 	}
-	conn, err := pgx.ConnectConfig(ctx, c.ConnectConfig)
+	pool, err := pgxpool.NewWithConfig(ctx, c.ConnectConfig)
 	if err != nil {
 		return nil, err
 	}
-	return &Repository{conn, c.Logger}, nil
+	return &Repository{pool, c.Logger}, nil
 }

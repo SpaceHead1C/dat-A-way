@@ -40,16 +40,26 @@ func main() {
 	if err := migrations.UpMigrations(dbCC); err != nil {
 		l.Fatal(err.Error())
 	}
-	dbCtx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	repo, err := pg.NewRepository(dbCtx, pg.Config{
-		ConnectConfig: dbCC,
-		Logger:        l,
+	poolCC, err := pkgpg.NewPoolConfig(pkgpg.Config{
+		Address:      c.PostgresAddress,
+		Port:         c.PostgresPort,
+		User:         c.PostgresUser,
+		Password:     c.PostgresPassword,
+		DatabaseName: c.PostgresDBName,
 	})
-	cancel()
 	if err != nil {
 		l.Fatal(err.Error())
 	}
-	defer repo.Close(context.Background())
+	dbCtx, dbCancel := context.WithTimeout(context.Background(), time.Second*10)
+	repo, err := pg.NewRepository(dbCtx, pg.Config{
+		ConnectConfig: poolCC,
+		Logger:        l,
+	})
+	dbCancel()
+	if err != nil {
+		l.Fatal(err.Error())
+	}
+	defer repo.Close()
 	l.Info("repository configured")
 
 	consumerManager, err := api.NewConsumerManager(api.ConsumerConfig{
