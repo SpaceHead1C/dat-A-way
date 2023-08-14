@@ -7,9 +7,9 @@ import (
 	"os"
 	"time"
 
-	"dataway/grpc"
 	"dataway/internal/adapter/pg"
 	"dataway/internal/api"
+	"dataway/internal/grpc"
 	"dataway/internal/migrations"
 	"dataway/internal/rest"
 	pkgpg "dataway/pkg/db/pg"
