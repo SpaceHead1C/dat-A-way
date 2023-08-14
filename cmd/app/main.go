@@ -2,17 +2,18 @@ package main
 
 import (
 	"context"
-	"dataway/grpc"
-	"dataway/internal/adapter/pg"
-	"dataway/internal/api"
-	"dataway/internal/migrations"
-	pkgpg "dataway/pkg/db/pg"
-	pkglog "dataway/pkg/log"
-	"dataway/rest"
 	"fmt"
 	"log"
 	"os"
 	"time"
+
+	"dataway/grpc"
+	"dataway/internal/adapter/pg"
+	"dataway/internal/api"
+	"dataway/internal/migrations"
+	"dataway/internal/rest"
+	pkgpg "dataway/pkg/db/pg"
+	pkglog "dataway/pkg/log"
 
 	"golang.org/x/sync/errgroup"
 )
