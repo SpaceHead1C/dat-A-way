@@ -22,6 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 const (
 	Dataway_Ping_FullMethodName               = "/proto.Dataway/Ping"
 	Dataway_RegisterNewTom_FullMethodName     = "/proto.Dataway/RegisterNewTom"
+	Dataway_UpdateTom_FullMethodName          = "/proto.Dataway/UpdateTom"
 	Dataway_Subscribe_FullMethodName          = "/proto.Dataway/Subscribe"
 	Dataway_DeleteSubscription_FullMethodName = "/proto.Dataway/DeleteSubscription"
 )
@@ -32,6 +33,7 @@ const (
 type DatawayClient interface {
 	Ping(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	RegisterNewTom(ctx context.Context, in *RegisterTomRequest, opts ...grpc.CallOption) (*UUID, error)
+	UpdateTom(ctx context.Context, in *UpdateTomRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Subscribe(ctx context.Context, in *Subscription, opts ...grpc.CallOption) (*Subscription, error)
 	DeleteSubscription(ctx context.Context, in *Subscription, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
@@ -62,6 +64,15 @@ func (c *datawayClient) RegisterNewTom(ctx context.Context, in *RegisterTomReque
 	return out, nil
 }
 
+func (c *datawayClient) UpdateTom(ctx context.Context, in *UpdateTomRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, Dataway_UpdateTom_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *datawayClient) Subscribe(ctx context.Context, in *Subscription, opts ...grpc.CallOption) (*Subscription, error) {
 	out := new(Subscription)
 	err := c.cc.Invoke(ctx, Dataway_Subscribe_FullMethodName, in, out, opts...)
@@ -86,6 +97,7 @@ func (c *datawayClient) DeleteSubscription(ctx context.Context, in *Subscription
 type DatawayServer interface {
 	Ping(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
 	RegisterNewTom(context.Context, *RegisterTomRequest) (*UUID, error)
+	UpdateTom(context.Context, *UpdateTomRequest) (*emptypb.Empty, error)
 	Subscribe(context.Context, *Subscription) (*Subscription, error)
 	DeleteSubscription(context.Context, *Subscription) (*emptypb.Empty, error)
 	mustEmbedUnimplementedDatawayServer()
@@ -100,6 +112,9 @@ func (UnimplementedDatawayServer) Ping(context.Context, *emptypb.Empty) (*emptyp
 }
 func (UnimplementedDatawayServer) RegisterNewTom(context.Context, *RegisterTomRequest) (*UUID, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RegisterNewTom not implemented")
+}
+func (UnimplementedDatawayServer) UpdateTom(context.Context, *UpdateTomRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateTom not implemented")
 }
 func (UnimplementedDatawayServer) Subscribe(context.Context, *Subscription) (*Subscription, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Subscribe not implemented")
@@ -156,6 +171,24 @@ func _Dataway_RegisterNewTom_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Dataway_UpdateTom_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateTomRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DatawayServer).UpdateTom(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Dataway_UpdateTom_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DatawayServer).UpdateTom(ctx, req.(*UpdateTomRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Dataway_Subscribe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Subscription)
 	if err := dec(in); err != nil {
@@ -206,6 +239,10 @@ var Dataway_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RegisterNewTom",
 			Handler:    _Dataway_RegisterNewTom_Handler,
+		},
+		{
+			MethodName: "UpdateTom",
+			Handler:    _Dataway_UpdateTom_Handler,
 		},
 		{
 			MethodName: "Subscribe",
