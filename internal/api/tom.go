@@ -2,10 +2,12 @@ package api
 
 import (
 	"context"
-	. "dataway/internal/domain"
 	"fmt"
-	"github.com/google/uuid"
 	"time"
+
+	. "dataway/internal/domain"
+
+	"github.com/google/uuid"
 )
 
 const defaultTomManagerTimeout = time.Second
@@ -21,7 +23,7 @@ type TomConfig struct {
 
 func NewTomManager(c TomConfig) (*TomManager, error) {
 	if c.Repository == nil {
-		return nil, fmt.Errorf("tom repository can't be nil")
+		return nil, fmt.Errorf("tom repository can not be nil")
 	}
 	if c.Timeout == 0 {
 		c.Timeout = defaultTomManagerTimeout
@@ -29,8 +31,8 @@ func NewTomManager(c TomConfig) (*TomManager, error) {
 	return &TomManager{c}, nil
 }
 
-func (tm *TomManager) Add(ctx context.Context) (uuid.UUID, error) {
+func (tm *TomManager) Add(ctx context.Context, req RegisterTomRequest) (uuid.UUID, error) {
 	ctx, cancel := context.WithTimeout(ctx, tm.Timeout)
 	defer cancel()
-	return tm.Repository.AddTom(ctx)
+	return tm.Repository.AddTom(ctx, req)
 }

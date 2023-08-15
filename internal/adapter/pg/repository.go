@@ -8,7 +8,11 @@ import (
 	"go.uber.org/zap"
 )
 
-const getUUIDAttemptsThreshold = 10
+const (
+	getUUIDAttemptsThreshold = 10
+
+	tableTomColumnName = "name"
+)
 
 type Config struct {
 	ConnectConfig *pgxpool.Config
