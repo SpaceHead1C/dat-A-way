@@ -78,6 +78,11 @@ func (s *server) RegisterNewTom(ctx context.Context, req *RegisterTomRequest) (*
 	return RegisterNewTom(ctx, req, s.tomManager)
 }
 
+func (s *server) UpdateTom(ctx context.Context, req *UpdateTomRequest) (*emptypb.Empty, error) {
+	ctx = log.ContextWithLogger(ctx, s.logger)
+	return &emptypb.Empty{}, UpdateTom(ctx, req, s.tomManager)
+}
+
 func (s *server) Subscribe(ctx context.Context, req *Subscription) (*Subscription, error) {
 	ctx = log.ContextWithLogger(ctx, s.logger)
 	return Subscribe(ctx, s.subscriptionManager, req)
