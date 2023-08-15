@@ -2,15 +2,17 @@ package grpc
 
 import (
 	"context"
+	"fmt"
+	"net"
+
 	"dataway/internal/api"
 	"dataway/internal/domain"
 	. "dataway/internal/pb"
 	"dataway/pkg/log"
-	"fmt"
+
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"net"
 )
 
 type server struct {
@@ -71,9 +73,9 @@ func (s *server) Ping(_ context.Context, _ *emptypb.Empty) (*emptypb.Empty, erro
 	return &emptypb.Empty{}, nil
 }
 
-func (s *server) RegisterNewTom(ctx context.Context, _ *emptypb.Empty) (*UUID, error) {
+func (s *server) RegisterNewTom(ctx context.Context, req *RegisterTomRequest) (*UUID, error) {
 	ctx = log.ContextWithLogger(ctx, s.logger)
-	return RegisterNewTom(ctx, s.tomManager)
+	return RegisterNewTom(ctx, req, s.tomManager)
 }
 
 func (s *server) Subscribe(ctx context.Context, req *Subscription) (*Subscription, error) {
