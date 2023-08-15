@@ -8,8 +8,19 @@ import (
 
 type TomRepository interface {
 	AddTom(context.Context, RegisterTomRequest) (uuid.UUID, error)
+	UpdateTom(context.Context, UpdateTomRequest) (*Tom, error)
+}
+
+type Tom struct {
+	ID   uuid.UUID
+	Name string
 }
 
 type RegisterTomRequest struct {
+	Name string
+}
+
+type UpdateTomRequest struct {
+	ID   uuid.UUID
 	Name string
 }

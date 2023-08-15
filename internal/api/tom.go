@@ -36,3 +36,9 @@ func (tm *TomManager) Add(ctx context.Context, req RegisterTomRequest) (uuid.UUI
 	defer cancel()
 	return tm.Repository.AddTom(ctx, req)
 }
+
+func (tm *TomManager) Update(ctx context.Context, req UpdateTomRequest) (*Tom, error) {
+	ctx, cancel := context.WithTimeout(ctx, tm.Timeout)
+	defer cancel()
+	return tm.Repository.UpdateTom(ctx, req)
+}
