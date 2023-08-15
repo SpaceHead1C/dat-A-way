@@ -61,7 +61,7 @@ func newPgRepo(t *testing.T) *apg.Repository {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dbCC, err := pkgpg.NewConnConfig(pkgpg.Config{
+	pool, err := pkgpg.NewPoolConfig(pkgpg.Config{
 		Address:      os.Getenv("TEST_POSTGRES_HOST"),
 		Port:         uint(port),
 		User:         os.Getenv("TEST_POSTGRES_USER"),
@@ -73,7 +73,7 @@ func newPgRepo(t *testing.T) *apg.Repository {
 	}
 	dbCtx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	out, err := pg.NewRepository(dbCtx, pg.Config{
-		ConnectConfig: dbCC,
+		ConnectConfig: pool,
 		Logger:        l,
 	})
 	cancel()
