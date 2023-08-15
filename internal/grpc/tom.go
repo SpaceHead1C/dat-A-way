@@ -19,10 +19,10 @@ func RegisterNewTom(ctx context.Context, req *pb.RegisterTomRequest, man *api.To
 	}
 	id, err := man.Add(ctx, domain.RegisterTomRequest{Name: req.Name})
 	if err != nil {
-		log.LoggerFromContext(ctx).Errorf("new tom register error: %s", err)
 		if errors.Is(err, domain.ErrDuplicate) {
 			return nil, status.Errorf(codes.AlreadyExists, err.Error())
 		}
+		log.LoggerFromContext(ctx).Errorf("new tom register error: %s", err)
 		return nil, status.Errorf(codes.Internal, "new tom register error")
 	}
 	return pb.UUIDToPb(id), nil
@@ -34,13 +34,13 @@ func UpdateTom(ctx context.Context, req *pb.UpdateTomRequest, man *api.TomManage
 		return status.Errorf(codes.InvalidArgument, err.Error())
 	}
 	if _, err := man.Update(ctx, r); err != nil {
-		log.LoggerFromContext(ctx).Errorf("tom update error: %s", err)
 		switch true {
 		case errors.Is(err, domain.ErrDuplicate):
 			return status.Errorf(codes.AlreadyExists, err.Error())
 		case errors.Is(err, domain.ErrNotFound):
 			return status.Errorf(codes.NotFound, err.Error())
 		default:
+			log.LoggerFromContext(ctx).Errorf("tom update error: %s", err)
 			return status.Errorf(codes.Internal, "tom update error")
 		}
 	}

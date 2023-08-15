@@ -13,7 +13,7 @@ import (
 func Subscribe(ctx context.Context, man *api.SubscriptionManager, req *pb.Subscription) (*pb.Subscription, error) {
 	s, err := subscriptionFromPb(req)
 	if err != nil {
-		return nil, err
+		return nil, status.Errorf(codes.InvalidArgument, err.Error())
 	}
 	out, err := man.Add(ctx, domain.AddSubscriptionRequest{
 		ConsumerID: s.ConsumerID,
