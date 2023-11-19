@@ -1,5 +1,11 @@
 package rmq
 
+import (
+	"time"
+
+	amqp "github.com/rabbitmq/amqp091-go"
+)
+
 type QueueOption func(options *queueOptions)
 
 type queueOptions struct {
