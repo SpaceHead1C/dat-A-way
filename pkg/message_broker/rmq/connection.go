@@ -79,8 +79,66 @@ func (conn *Connection) Close() {
 	}
 }
 
+func (conn *Connection) Consumer(queue string, handler Handler, opts ...ConsumeOption) (*Consumer, error) {
+	ch, err := conn.channel()
+	if err != nil {
+		return nil, err
+	}
+	var options consumeOptions
+	for _, opt := range opts {
+		opt(&options)
+	}
+	out := &Consumer{
+		conn: conn,
+		ch:   ch,
+		mu:   &sync.RWMutex{},
+
+		isClosedMu: &sync.RWMutex{},
+
+		queue:   queue,
+		handler: handler,
+		opts:    options,
+	}
+	go func() {
+		for err := range out.ch.errCh {
+			conn.l.Infof("successful consumer recovery from: %s", err)
+			if err := out.start(); err != nil {
+				conn.l.Errorf("start consuming error: %s", err)
+				return
+			}
+		}
+	}()
+	if err := out.start(); err != nil {
+		return nil, fmt.Errorf("start consuming error: %w", err)
+	}
+	return out, nil
+}
+
 func connectionString(c ConnectionConfig) string {
 	return fmt.Sprintf("amqp://%s:%s@%s:%d/%s", c.User, c.Password, c.Host, c.Port, c.VHost)
+}
+
+func (conn *Connection) channel() (*channel, error) {
+	ch, err := conn.conn.Channel()
+	if err != nil {
+		return nil, fmt.Errorf("failed to open a channel: %w", err)
+	}
+	closeCh := make(chan struct{})
+	errCh := make(chan error)
+	go func() {
+		<-closeCh
+		conn.l.Info("closed")
+		close(errCh)
+	}()
+	out := &channel{
+		conn:    conn,
+		ch:      ch,
+		errCh:   errCh,
+		closeCh: closeCh,
+		mu:      &sync.RWMutex{},
+	}
+	go out.listenNotifies()
+	return out, nil
 }
 
 func (conn *Connection) startNotifyClose() {

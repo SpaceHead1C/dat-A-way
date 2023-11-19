@@ -1,82 +1,130 @@
 package rmq
 
 import (
-	"errors"
+	"sync"
 
 	amqp "github.com/rabbitmq/amqp091-go"
-	rmq "github.com/wagslane/go-rabbitmq"
-	"go.uber.org/zap"
 )
 
-const QueueDLEArg = "x-dead-letter-exchange"
-
-type ConsumerConfig struct {
-	Logger    *zap.SugaredLogger
-	Conn      *Connection
-	Queue     string
-	Handler   rmq.Handler
-	QueueArgs QueueArgs
-}
-
 type Consumer struct {
-	conn    *Connection
+	conn *Connection
+	ch   *channel
+	mu   *sync.RWMutex
+
+	isClosedMu *sync.RWMutex
+	isClosed   bool
+
 	queue   string
-	handler rmq.Handler
-	args    QueueArgs
-	l       *zap.SugaredLogger
+	handler Handler
+	opts    consumeOptions
 }
 
-func NewConsumer(c ConsumerConfig) *Consumer {
-	return &Consumer{
-		conn:    c.Conn,
-		queue:   c.Queue,
-		handler: c.Handler,
-		args:    c.QueueArgs,
-		l:       c.Logger,
+func (cons *Consumer) Close() {
+	cons.isClosedMu.Lock()
+	defer cons.isClosedMu.Unlock()
+	cons.isClosed = true
+	err := cons.ch.close()
+	if err != nil {
+		cons.conn.l.Errorf("close consumer's channel error: %s", err)
 	}
+	go func() {
+		cons.ch.closeCh <- closeSignal
+	}()
 }
 
-func (c *Consumer) Consume() error {
-	consumer, err := rmq.NewConsumer(
-		c.conn.conn,
-		c.handler,
-		c.queue,
-		rmq.WithConsumerOptionsQueueDurable,
-		rmq.WithConsumerOptionsQueueArgs(c.args.asRmqTable()),
-		rmq.WithConsumerOptionsLogger(logger{c.l}),
+func (cons *Consumer) start() error {
+	msgs, err := cons.ch.consume(
+		cons.queue,
+		cons.opts.name,
+		cons.opts.autoAck,
+		cons.opts.exclusive,
+		cons.opts.noLocal,
+		cons.opts.noWait,
+		cons.opts.args.asNativeType(),
 	)
 	if err != nil {
 		return err
 	}
-	defer consumer.Close()
-	var forever chan struct{}
-	<-forever
-	return errors.New("rmq consumer is down")
+	go cons.handle(msgs, cons.opts.autoAck, cons.handler)
+	return nil
 }
 
-type QueueArgs rmq.Table
+func (cons *Consumer) handle(msgs <-chan amqp.Delivery, autoAck bool, handler Handler) {
+	for msg := range msgs {
+		if cons.getIsClosed() {
+			break
+		}
 
-func NewQueueArgs() QueueArgs {
-	return make(QueueArgs)
+		res := handler(Delivery{msg})
+		if autoAck {
+			continue
+		}
+		switch res {
+		case Ack:
+			err := msg.Ack(false)
+			if err != nil {
+				cons.conn.l.Errorf("ack message error: %s", err)
+			}
+		case NackDiscard:
+			err := msg.Nack(false, false)
+			if err != nil {
+				cons.conn.l.Errorf("nack message error: %s", err)
+			}
+		case NackRequeue:
+			err := msg.Nack(false, true)
+			if err != nil {
+				cons.conn.l.Errorf("nack message error: %s", err)
+			}
+		}
+	}
 }
 
-func (qa QueueArgs) AddArg(key string, value any) QueueArgs {
-	qa[key] = value
-	return qa
+func (cons *Consumer) getIsClosed() bool {
+	cons.isClosedMu.RLock()
+	defer cons.isClosedMu.RUnlock()
+	return cons.isClosed
 }
 
-func (qa QueueArgs) AddDLEArg(value string) QueueArgs {
-	return qa.AddArg(QueueDLEArg, value)
+type Action uint
+
+const (
+	Ack Action = iota
+	NackDiscard
+	NackRequeue
+)
+
+type Delivery struct {
+	amqp.Delivery
 }
 
-func (qa QueueArgs) AddTypeArg(value string) QueueArgs {
-	return qa.AddArg(amqp.QueueTypeArg, value)
+func (d Delivery) HeaderExists(key string) bool {
+	_, ok := d.Headers[key]
+	return ok
 }
 
-func (qa QueueArgs) AsClassic() QueueArgs {
-	return qa.AddTypeArg(amqp.QueueTypeClassic)
+func (d Delivery) HeaderValue(key string) (any, bool) {
+	value, ok := d.Headers[key]
+	return value, ok
 }
 
-func (qa QueueArgs) asRmqTable() rmq.Table {
-	return rmq.Table(qa)
+type Handler func(d Delivery) (action Action)
+
+type ConsumeArgs amqp.Table
+
+func NewConsumeArgs() ConsumeArgs {
+	return make(ConsumeArgs)
+}
+
+func (ca ConsumeArgs) SetArg(key string, value any) ConsumeArgs {
+	ca[key] = value
+	return ca
+}
+
+func (ca ConsumeArgs) DeleteArg(key string) ConsumeArgs {
+	delete(ca, key)
+	return ca
+}
+
+func (ca ConsumeArgs) asNativeType() amqp.Table {
+	return amqp.Table(ca)
 }
