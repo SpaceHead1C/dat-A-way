@@ -17,9 +17,9 @@ const (
 )
 
 type ConnectionConfig struct {
-	Logger   *zap.SugaredLogger
 	Address  string
 	Port     uint
+	Logger   *log.Logger
 	User     string
 	Password string
 	VHost    string
@@ -27,7 +27,7 @@ type ConnectionConfig struct {
 
 type Connection struct {
 	conn *rmq.Conn
-	l    *zap.SugaredLogger
+	l    *log.Logger
 }
 
 func NewConnection(c ConnectionConfig) (*Connection, error) {
