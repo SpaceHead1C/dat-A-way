@@ -1,6 +1,7 @@
 package rmq
 
 import (
+	"context"
 	"errors"
 	"sync"
 	"time"
@@ -64,4 +65,38 @@ func (ch *channel) reconnect() error {
 	}
 	ch.ch = newCh
 	return nil
+}
+
+func (ch *channel) queueDeclare(opts queueOptions) (string, error) {
+	ch.mu.RLock()
+	defer ch.mu.RUnlock()
+
+	f := ch.ch.QueueDeclare
+	if opts.passive {
+		f = ch.ch.QueueDeclarePassive
+	}
+	q, err := f(
+		opts.name,
+		opts.durable,
+		opts.autoDelete,
+		opts.exclusive,
+		opts.noWait,
+		opts.args.asNativeType(),
+	)
+	if err != nil {
+		return "", err
+	}
+	return q.Name, nil
+}
+
+func (ch *channel) publishWithContext(ctx context.Context, exchange string, key string, mandatory bool, immediate bool, msg amqp.Publishing) error {
+	ch.mu.RLock()
+	defer ch.mu.RUnlock()
+	return ch.ch.PublishWithContext(ctx, exchange, key, mandatory, immediate, msg)
+}
+
+func (ch *channel) consume(queue string, consumer string, autoAck bool, exclusive bool, noLocal bool, noWait bool, args amqp.Table) (<-chan amqp.Delivery, error) {
+	ch.mu.RLock()
+	defer ch.mu.RUnlock()
+	return ch.ch.Consume(queue, consumer, autoAck, exclusive, noLocal, noWait, args)
 }
