@@ -2,19 +2,17 @@ package log
 
 import (
 	"context"
-
-	"go.uber.org/zap"
 )
 
 type ctxLogger struct{}
 
-func ContextWithLogger(ctx context.Context, l *zap.SugaredLogger) context.Context {
+func ContextWithLogger(ctx context.Context, l *Logger) context.Context {
 	return context.WithValue(ctx, ctxLogger{}, l)
 }
 
-func LoggerFromContext(ctx context.Context) *zap.SugaredLogger {
-	if l, ok := ctx.Value(ctxLogger{}).(*zap.SugaredLogger); ok {
+func LoggerFromContext(ctx context.Context) *Logger {
+	if l, ok := ctx.Value(ctxLogger{}).(*Logger); ok {
 		return l
 	}
-	return zap.L().Sugar()
+	return GlobalLogger()
 }

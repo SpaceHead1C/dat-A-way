@@ -23,7 +23,7 @@ func main() {
 	if err := parse(os.Args[1:], c); err != nil {
 		log.Fatalf("arguments parse error: %s", err)
 	}
-	l, err := pkglog.NewLogger()
+	l, err := pkglog.New()
 	if err != nil {
 		log.Fatalf("logger constructor error: %s", err)
 	}

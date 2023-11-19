@@ -53,7 +53,7 @@ func newPgRepo(t *testing.T) *apg.Repository {
 	if err := gotenv.Load(); err != nil {
 		t.Fatal(err)
 	}
-	l, err := log.NewLogger()
+	l, err := log.New()
 	if err != nil {
 		t.Fatal(err)
 	}

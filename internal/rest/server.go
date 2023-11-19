@@ -10,7 +10,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	mw "github.com/go-chi/chi/v5/middleware"
-	"go.uber.org/zap"
 )
 
 const (
@@ -20,7 +19,7 @@ const (
 )
 
 type server struct {
-	logger          *zap.SugaredLogger
+	logger          *log.Logger
 	srv             *http.Server
 	errorHandler    func(error)
 	timeout         time.Duration
@@ -32,7 +31,7 @@ func (s *server) Serve() error {
 }
 
 type Config struct {
-	Logger          *zap.SugaredLogger
+	Logger          *log.Logger
 	Port            uint
 	ErrorHandler    func(error)
 	Timeout         time.Duration
@@ -40,13 +39,9 @@ type Config struct {
 }
 
 func NewServer(c Config) (domain.Server, error) {
-	var err error
 	l := c.Logger
 	if l == nil {
-		l, err = log.NewLogger()
-		if err != nil {
-			return nil, err
-		}
+		l = log.GlobalLogger()
 	}
 	eh := c.ErrorHandler
 	if eh == nil {

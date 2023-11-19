@@ -2,10 +2,10 @@ package pg
 
 import (
 	"context"
+	"dataway/pkg/log"
 	"fmt"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"go.uber.org/zap"
 )
 
 const (
@@ -16,12 +16,12 @@ const (
 
 type Config struct {
 	ConnectConfig *pgxpool.Config
-	Logger        *zap.SugaredLogger
+	Logger        *log.Logger
 }
 
 type Repository struct {
 	*pgxpool.Pool
-	l *zap.SugaredLogger
+	l *log.Logger
 }
 
 func NewRepository(ctx context.Context, c Config) (*Repository, error) {
@@ -29,7 +29,7 @@ func NewRepository(ctx context.Context, c Config) (*Repository, error) {
 		return nil, fmt.Errorf("connect config is nil")
 	}
 	if c.Logger == nil {
-		c.Logger = zap.L().Sugar()
+		c.Logger = log.GlobalLogger()
 	}
 	pool, err := pgxpool.NewWithConfig(ctx, c.ConnectConfig)
 	if err != nil {

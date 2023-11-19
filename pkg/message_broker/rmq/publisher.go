@@ -2,10 +2,10 @@ package rmq
 
 import (
 	"context"
+	"dataway/pkg/log"
 	"errors"
 
 	rmq "github.com/wagslane/go-rabbitmq"
-	"go.uber.org/zap"
 )
 
 type Publisher struct {
@@ -20,7 +20,7 @@ type Publishing struct {
 }
 
 type PublisherConfig struct {
-	Logger   *zap.SugaredLogger
+	Logger   *log.Logger
 	Conn     *Connection
 	Exchange string
 }

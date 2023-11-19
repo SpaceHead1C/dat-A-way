@@ -10,14 +10,13 @@ import (
 	. "dataway/internal/pb"
 	"dataway/pkg/log"
 
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type server struct {
 	UnimplementedDatawayServer
-	logger   *zap.SugaredLogger
+	logger   *log.Logger
 	srv      *grpc.Server
 	listener net.Listener
 	port     uint
@@ -27,7 +26,7 @@ type server struct {
 }
 
 type Config struct {
-	Logger *zap.SugaredLogger
+	Logger *log.Logger
 	Port   uint
 
 	TomManager          *api.TomManager
@@ -35,13 +34,9 @@ type Config struct {
 }
 
 func NewServer(c Config) (domain.Server, error) {
-	var err error
 	l := c.Logger
 	if l == nil {
-		l, err = log.NewLogger()
-		if err != nil {
-			return nil, err
-		}
+		l = log.GlobalLogger()
 	}
 	if c.TomManager == nil {
 		return nil, fmt.Errorf("toms manager must be not nil")
