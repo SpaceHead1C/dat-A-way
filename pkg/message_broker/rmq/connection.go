@@ -79,6 +79,24 @@ func (conn *Connection) Close() {
 	}
 }
 
+func (conn *Connection) Publisher() (*Publisher, error) {
+	ch, err := conn.channel()
+	if err != nil {
+		return nil, err
+	}
+	out := &Publisher{
+		conn: conn,
+		ch:   ch,
+		mu:   &sync.RWMutex{},
+	}
+	go func() {
+		for err := range out.ch.errCh {
+			conn.l.Infof("successful publisher recovery from: %s", err)
+		}
+	}()
+	return out, nil
+}
+
 func (conn *Connection) Consumer(queue string, handler Handler, opts ...ConsumeOption) (*Consumer, error) {
 	ch, err := conn.channel()
 	if err != nil {
