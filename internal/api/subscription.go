@@ -5,6 +5,8 @@ import (
 	. "dataway/internal/domain"
 	"fmt"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const defaultSubscriptionManagerTimeout = time.Second
@@ -38,4 +40,16 @@ func (sm *SubscriptionManager) Delete(ctx context.Context, req DeleteSubscriptio
 	ctx, cancel := context.WithTimeout(ctx, sm.Timeout)
 	defer cancel()
 	return sm.Repository.DeleteSubscription(ctx, req)
+}
+
+func (sm *SubscriptionManager) SubscriberIDs(ctx context.Context, req SubscriberIDsRequest) ([]uuid.UUID, error) {
+	ctx, cancel := context.WithTimeout(ctx, sm.Timeout)
+	defer cancel()
+	return sm.Repository.GetSubscriberIDs(ctx, req)
+}
+
+func (sm *SubscriptionManager) SubscriberExists(ctx context.Context, req SubscriberExistanceRequest) (bool, error) {
+	ctx, cancel := context.WithTimeout(ctx, sm.Timeout)
+	defer cancel()
+	return sm.Repository.SubscriberExists(ctx, req)
 }
