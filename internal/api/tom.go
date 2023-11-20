@@ -18,6 +18,7 @@ type TomManager struct {
 
 type TomConfig struct {
 	Repository TomRepository
+	Broker     TomBroker
 	Timeout    time.Duration
 }
 
