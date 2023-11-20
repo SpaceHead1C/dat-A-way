@@ -9,6 +9,7 @@ import (
 	"dataway/internal/pb"
 	"dataway/pkg/log"
 
+	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -24,6 +25,9 @@ func RegisterNewTom(ctx context.Context, req *pb.RegisterTomRequest, man *api.To
 		}
 		log.LoggerFromContext(ctx).Errorf("new tom register error: %s", err)
 		return nil, status.Errorf(codes.Internal, "new tom register error")
+	}
+	if err := declareTomQueue(ctx, id, man); err != nil {
+		log.LoggerFromContext(ctx).Errorf("new tom queue declare error: %s", err)
 	}
 	return pb.UUIDToPb(id), nil
 }
@@ -60,4 +64,15 @@ func updateTomRequestFromPb(in *pb.UpdateTomRequest) (domain.UpdateTomRequest, e
 	}
 	out.ID = id
 	return out, nil
+}
+
+func declareTomQueue(ctx context.Context, id uuid.UUID, man *api.TomManager) error {
+	tom, err := man.Get(ctx, id)
+	if err != nil {
+		return err
+	}
+	if err := man.QueueDeclare(ctx, *tom); err != nil {
+		return err
+	}
+	return man.SetAsReady(ctx, id)
 }
