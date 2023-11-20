@@ -59,3 +59,15 @@ func (r *Repository) UpdateTom(ctx context.Context, req domain.UpdateTomRequest)
 	}
 	return &out, nil
 }
+
+func (r *Repository) GetTom(ctx context.Context, id uuid.UUID) (*domain.Tom, error) {
+	query := `SELECT * FROM get_tom($1);`
+	var out domain.Tom
+	if err := r.QueryRow(ctx, query, id).Scan(&out.ID, &out.Name, &out.Ready); err != nil {
+		if pg.IsNoRowsError(err) {
+			return nil, domain.ErrTomNotFound
+		}
+		return nil, fmt.Errorf("database error: %w, %s", err, query)
+	}
+	return &out, nil
+}

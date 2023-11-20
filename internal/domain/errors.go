@@ -7,6 +7,7 @@ import (
 
 var (
 	ErrNotFound         = errors.New("not found")
+	ErrTomNotFound      = fmt.Errorf("tom %w", ErrNotFound)
 	ErrConsumerNotFound = fmt.Errorf("consumer %w", ErrNotFound)
 
 	ErrExpected = errors.New("expected")

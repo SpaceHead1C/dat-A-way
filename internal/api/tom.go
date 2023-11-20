@@ -42,3 +42,26 @@ func (tm *TomManager) Update(ctx context.Context, req UpdateTomRequest) (*Tom, e
 	defer cancel()
 	return tm.Repository.UpdateTom(ctx, req)
 }
+
+func (tm *TomManager) Get(ctx context.Context, id uuid.UUID) (*Tom, error) {
+	ctx, cancel := context.WithTimeout(ctx, tm.Timeout)
+	defer cancel()
+	return tm.Repository.GetTom(ctx, id)
+}
+
+func (tm *TomManager) QueueDeclare(ctx context.Context, tom Tom) error {
+	ctx, cancel := context.WithTimeout(ctx, tm.Timeout)
+	defer cancel()
+	return tm.Broker.DeclareTomQueue(ctx, tom)
+}
+
+func (tm *TomManager) SetAsReady(ctx context.Context, id uuid.UUID) error {
+	ready := true
+	ctx, cancel := context.WithTimeout(ctx, tm.Timeout)
+	defer cancel()
+	_, err := tm.Repository.UpdateTom(ctx, UpdateTomRequest{
+		ID:    id,
+		Ready: &ready,
+	})
+	return err
+}

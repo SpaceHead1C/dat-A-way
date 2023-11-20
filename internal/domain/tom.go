@@ -9,6 +9,7 @@ import (
 type TomRepository interface {
 	AddTom(context.Context, RegisterTomRequest) (uuid.UUID, error)
 	UpdateTom(context.Context, UpdateTomRequest) (*Tom, error)
+	GetTom(context.Context, uuid.UUID) (*Tom, error)
 }
 
 type Tom struct {
