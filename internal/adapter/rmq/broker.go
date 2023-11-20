@@ -5,6 +5,8 @@ import (
 	"dataway/pkg/message_broker/rmq"
 )
 
+const contentTypeAppJSON = "application/json"
+
 type Config struct {
 	Publisher *rmq.Publisher
 	Logger    *log.Logger
