@@ -49,7 +49,7 @@ func UpdateTom(ctx context.Context, req *pb.UpdateTomRequest, man *api.TomManage
 
 func updateTomRequestFromPb(in *pb.UpdateTomRequest) (domain.UpdateTomRequest, error) {
 	out := domain.UpdateTomRequest{
-		Name: in.Name,
+		Name: &in.Name,
 	}
 	if in.Name == "" {
 		return out, errors.New("name is empty")

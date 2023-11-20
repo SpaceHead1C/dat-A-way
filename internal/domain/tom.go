@@ -12,8 +12,9 @@ type TomRepository interface {
 }
 
 type Tom struct {
-	ID   uuid.UUID
-	Name string
+	ID    uuid.UUID
+	Name  string
+	Ready bool
 }
 
 type RegisterTomRequest struct {
@@ -21,6 +22,7 @@ type RegisterTomRequest struct {
 }
 
 type UpdateTomRequest struct {
-	ID   uuid.UUID
-	Name string
+	ID    uuid.UUID
+	Name  *string
+	Ready *bool
 }

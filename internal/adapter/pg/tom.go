@@ -32,17 +32,27 @@ func (r *Repository) AddTom(ctx context.Context, req domain.RegisterTomRequest) 
 }
 
 func (r *Repository) UpdateTom(ctx context.Context, req domain.UpdateTomRequest) (*domain.Tom, error) {
-	var out domain.Tom
-	args := []any{
-		req.ID,
-		pg.NullString(req.Name),
+	emptyReq := true
+	args := make([]any, 3)
+	args[0] = req.ID
+	if req.Name != nil {
+		args[1] = pg.NullString(*req.Name)
+		emptyReq = false
 	}
-	query := `SELECT * FROM update_tom($1, $2);`
-	if err := r.QueryRow(ctx, query, args...).Scan(&out.ID, &out.Name); err != nil {
+	if req.Ready != nil {
+		args[2] = *req.Ready
+		emptyReq = false
+	}
+	if emptyReq {
+		return r.GetTom(ctx, req.ID)
+	}
+	var out domain.Tom
+	query := `SELECT * FROM update_tom($1, $2, $3);`
+	if err := r.QueryRow(ctx, query, args...).Scan(&out.ID, &out.Name, &out.Ready); err != nil {
 		if pg.IsNoRowsError(err) {
 			return nil, fmt.Errorf("tom %w", domain.ErrNotFound)
 		}
-		if isTomNameDuplicateError(err, req.Name) {
+		if req.Name != nil && isTomNameDuplicateError(err, *req.Name) {
 			return nil, domain.ErrNameDuplicate
 		}
 		return nil, fmt.Errorf("database error: %w, %s", err, query)
